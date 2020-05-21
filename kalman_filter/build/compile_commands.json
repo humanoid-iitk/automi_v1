@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/adit/projects/kalman/build",
+  "command": "/usr/bin/x86_64-linux-gnu-g++-7   -I/usr/include/eigen3   -std=c++11 -g   -o CMakeFiles/kalman-test.dir/kalman.cpp.o -c /home/adit/projects/kalman/kalman.cpp",
+  "file": "/home/adit/projects/kalman/kalman.cpp"
+},
+{
+  "directory": "/home/adit/projects/kalman/build",
+  "command": "/usr/bin/x86_64-linux-gnu-g++-7   -I/usr/include/eigen3   -std=c++11 -g   -o CMakeFiles/kalman-test.dir/kalman_test.cpp.o -c /home/adit/projects/kalman/kalman_test.cpp",
+  "file": "/home/adit/projects/kalman/kalman_test.cpp"
+}
+]
