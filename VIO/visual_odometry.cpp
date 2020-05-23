@@ -1,11 +1,10 @@
-#pragma once
 #include<opencv2/opencv.hpp>
 #include<opencv2/features2d.hpp>
 #include<opencv2/calib3d.hpp>
 #include<vector>
 
-namespace huroiitk{
-    void extract_features(const cv::Mat& image, std::vector<cv::KeyPoint>& kp, cv::Mat& des){
+namespace huro{
+    void extract_features(cv::InputArray image, std::vector<cv::KeyPoint>& kp, cv::Mat& des){
         static cv::Ptr<cv::ORB> orb = cv::ORB::create();
         std::vector<cv::KeyPoint> kp_temp;
         cv::Mat des_temp;
@@ -22,7 +21,7 @@ namespace huroiitk{
         return matches;
     }
 
-    std::vector<cv::DMatch> filtered_matches(const std::vector< std::vector<cv::DMatch>> matches, float threshold = 0.6){
+    std::vector<cv::DMatch> filter_matches(const std::vector< std::vector<cv::DMatch>> matches, float threshold = 0.6){
         std::vector<cv::DMatch> filtered_match;
         
         for (std::vector<cv::DMatch>match_pair: matches){
@@ -41,7 +40,6 @@ namespace huroiitk{
                          const cv::InputArray K,                    //camera matrix
                          cv::Mat& rmat, cv::Mat&tvect){          
         
-        cv::Mat rmat, tvect;
         std::vector<cv::Point2i> image1_points, image2_points;
         
         for (cv::DMatch match: matches){
