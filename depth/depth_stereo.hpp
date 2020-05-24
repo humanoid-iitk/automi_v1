@@ -12,16 +12,18 @@ namespace huro{
     
     class depth_generator{
         public:
-            depth_generator(const ros::NodeHandle& nh, const std::string& image_left_topic, const std::string& image_right_topic);      //initialise parameters
+            depth_generator(const ros::NodeHandle& nh, 
+                            const std::string& image_left_topic, 
+                            const std::string& image_right_topic);      //initialise parameters
             cv::Mat calc_depth();
 
-        // protected:
-            const float min_disparity_ = 0;
-            const int num_disparities_ = 6*16;
+        protected:
+            const int num_disparities_ = 4*16;
             const int block_size_ = 11;
-            const int window_size_ = 6;
-            const float focus_ = 1; 
-            const float baseline_ = 3;
+            const float focus_ = 1.3962; 
+            const float baseline_ = 1;
+            const int lambda_ = 8000;       //Got to configure these values properly
+            const int sigma_ = 5;   
 
             void left_update_callback(const sensor_msgs::ImageConstPtr& left);
             void right_update_callback(const sensor_msgs::ImageConstPtr& right);

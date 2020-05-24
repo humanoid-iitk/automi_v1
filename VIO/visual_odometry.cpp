@@ -2,6 +2,7 @@
 #include<opencv2/features2d.hpp>
 #include<opencv2/calib3d.hpp>
 #include<vector>
+#include<string>
 
 namespace huro{
     void extract_features(cv::InputArray image, std::vector<cv::KeyPoint>& kp, cv::Mat& des){
@@ -37,7 +38,7 @@ namespace huro{
     void estimate_motion(const std::vector<cv::DMatch>& matches, 
                          const std::vector<cv::KeyPoint>& kp1, 
                          const std::vector<cv::KeyPoint>& kp2,
-                         const cv::InputArray K,                    //camera matrix
+                         const cv::InputArray K,                        //camera matrix
                          cv::Mat& rmat, cv::Mat&tvect){          
         
         std::vector<cv::Point2i> image1_points, image2_points;

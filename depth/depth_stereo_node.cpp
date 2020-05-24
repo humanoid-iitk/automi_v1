@@ -5,18 +5,27 @@
 #include<opencv2/opencv.hpp>
 #include<opencv2/features2d.hpp>
 #include<depth_stereo.hpp>
+#include<iostream>
+#include<opencv2/ximgproc/disparity_filter.hpp>
 
 int main(int argc, char**argv){
     ros::init(argc, argv, "depth_node");
     ros::NodeHandle nh;
 
-    huro::depth_generator gen(nh, "image_topic_1", "image_topic_2");
-    ros::Publisher depth_pub = nh.advertise<sensor_msgs::Image>("depth", 1);
-    while(ros::ok()){
+    huro::depth_generator gen(nh, "/husky/camera1/image_raw", "/husky/camera2/image_raw");
+
+    while (ros::ok()){
         cv::Mat depth = gen.calc_depth();
-        cv_bridge::CvImagePtr ptr;
-        ptr->image = depth;
-        depth_pub.publish(ptr->toImageMsg());
+        if (depth.rows > 0 && depth.cols > 0){
+            cv::Mat deptht;
+            cv::ximgproc::getDisparityVis(depth, deptht, 5);
+ 
+            // cv::medianBlur(deptht, depth, 15);
+            // std::cout << depth << std::endl;
+            cv::imshow("depth", deptht);
+            cv::waitKey(10);
+        }
+        // std::cout << depth << std::endl;
         ros::spinOnce();
     }
 
