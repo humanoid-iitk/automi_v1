@@ -13,9 +13,13 @@ namespace huro{
     class vio_estimator{
         public:
             vio_estimator(const ros::NodeHandle& nh, 
+                          const cv::Mat& K,
                           const std::string& image_topic, 
                           const std::string& imu_topic);
 
+            void update();
+            void getCurrentPos();
+            
         protected:
             Eigen::Vector3d pos_k_;
             Eigen::Vector3d pos_k_1_;
@@ -27,6 +31,7 @@ namespace huro{
 
             cv::Mat im_k_;
             cv::Mat im_k_1_;
+            cv::Mat K_;                     //camera matrix
             Eigen::Vector3d acc_;             
             Eigen::Matrix3d acc_cov_;           
             ros::NodeHandle nh_;

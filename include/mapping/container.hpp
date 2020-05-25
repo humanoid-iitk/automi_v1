@@ -10,7 +10,7 @@ namespace huro::Map{
 	
 	class Bot{
 		friend class Map;
-		
+
 		public:
 			Bot(const Eigen::Vector3d& init_pos);
 
@@ -18,7 +18,7 @@ namespace huro::Map{
 			Eigen::Vector3d pos;
 	};
 
-	template<int T, TYPE type>
+	template<int T, TYPE t>
 	class Container{
 		friend class Map;
 

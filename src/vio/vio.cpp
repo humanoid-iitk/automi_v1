@@ -7,16 +7,24 @@
 #include<eigen3/Eigen/Dense>
 #include<string>
 #include<opencv2/opencv.hpp>
+#include<iostream>
+#include<kalman.hpp>
 
 namespace huro{
     vio_estimator::vio_estimator(const ros::NodeHandle& nh, 
+            const cv::Mat& K,
             const std::string& image_topic, 
             const std::string& imu_topic): 
-            nh_(nh), it_(nh){
+            nh_(nh), it_(nh),
+            K_(K){
 
-        // image_left_sub_ = it_.subscribe(image_left_topic, 1, &depth_generator::left_update_callback, this);
         image_sub_ = it_.subscribe(image_topic, 1, &vio_estimator::image_update_cb, this);
         imu_sub_ = nh_.subscribe(imu_topic, 1, &vio_estimator::imu_update_cb, this);
+
+        pos_k_1_ << 0, 0, 0;
+        vel_k_1_ << 0, 0, 0;
+        pos_k_ << 0, 0, 0;
+        vel_k_ << 0, 0, 0;
     }
 
     void vio_estimator::image_update_cb(const sensor_msgs::ImageConstPtr& frame){
@@ -31,6 +39,10 @@ namespace huro{
 
         im_k_1_ = im_k_;
         cv::cvtColor(ptr->image, im_k_, cv::COLOR_BGR2GRAY);
+        if (im_k_.cols>0 && im_k_.rows>0){
+            cv::imshow("current", im_k_);
+            cv::waitKey(5);
+        }
         return;
     }
 
@@ -46,6 +58,12 @@ namespace huro{
                     msg->linear_acceleration_covariance[7],
                     msg->linear_acceleration_covariance[8];
 
+        std::cout << acc_ << std::endl;
+        std::cout << acc_cov_ << std::endl;
         return;
+    }
+
+    void vio_estimator::update(){
+
     }
 }
