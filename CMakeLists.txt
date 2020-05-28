@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   image_transport
+  message_generation
 )
 
 find_package(OpenCV 3 REQUIRED)
@@ -54,11 +55,11 @@ find_package(Eigen3 REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  object.msg
+  map.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -75,10 +76,11 @@ find_package(Eigen3 REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -110,12 +112,25 @@ find_package(Eigen3 REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
+ INCLUDE_DIRS 
+ include
+ include/mapping
+ include/vio 
+ include/depth 
+ include/kalman
+ include/${PROJECT_NAME}
+  
  LIBRARIES huro
+ 
  CATKIN_DEPENDS 
- roscpp rospy std_msgs 
- sensor_msgs image_transport
- cv_bridge geometry_msgs
+ roscpp 
+ rospy 
+ std_msgs 
+ sensor_msgs 
+ image_transport
+ cv_bridge 
+ geometry_msgs
+ message_runtime
 #  DEPENDS system_lib
 )
 
@@ -131,6 +146,7 @@ include_directories(
   include/mapping
   include/depth
   include/vio
+  include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS}
@@ -143,7 +159,7 @@ add_library(
   src/vio/visual_odometry.cpp
   src/vio/vio.cpp
   src/kalman/kalman.cpp
-  src/mapping/container.cpp 
+  # src/mapping/container.cpp 
   src/mapping/map.cpp
 )
 
@@ -157,6 +173,7 @@ add_library(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(depth_stereo_node src/depth/depth_stereo_node.cpp)
 add_executable(vio_node src/vio/vio_node.cpp)
+# add_executable(kinect_arm_node src/kinect_arm_node.cpp src/kinect_arm.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -189,6 +206,13 @@ target_link_libraries(
   ${Eigen3_LIBRARIES}
   huro
 )
+
+# target_link_libraries(
+#   kinect_arm_node
+#   ${catkin_LIBRARIES}
+#   ${OpenCV_LIBS}
+#   ${Eigen3_LIBRARIES}
+# )
 
 #############
 ## Install ##

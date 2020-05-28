@@ -4,7 +4,7 @@
 #include<array>
 #include<utility>
 
-namespace huro::Map{
+namespace huro{
 
 	enum class TYPE{BOX, RECTANGLE, CIRCLE, SPHERE};
 	
@@ -12,10 +12,11 @@ namespace huro::Map{
 		friend class Map;
 
 		public:
-			Bot(const Eigen::Vector3d& init_pos);
+			Bot(const Eigen::Vector3d& pos=Eigen::Vector3d(0, 0, 0)): pos(pos){}
 
 		protected:
 			Eigen::Vector3d pos;
+			//bot orient?
 	};
 
 	template<int T, TYPE t>
@@ -24,7 +25,10 @@ namespace huro::Map{
 
 		public:	
 			Container(const Eigen::Vector3d& pos, 
-					  const Eigen::Vector3d& orient);
+					  const Eigen::Vector3d& orient):
+					pos(pos), 
+					orient(orient), 
+					type(t){}
 
 		protected:
 			Eigen::Vector3d pos;
@@ -34,8 +38,8 @@ namespace huro::Map{
 			float occupancy_ratio;							//what ratio of container is occupied by object
 	};
 
-	typedef Container<3, TYPE::BOX> Box;				//l,b,h
-	typedef Container<1, TYPE::SPHERE> Sphere;			//radius
-	typedef Container<1, TYPE::CIRCLE> Circle;			//radius
-	typedef Container<2, TYPE::RECTANGLE> Rectangle;	//l, b
+	using Box = Container<3, TYPE::BOX>;				//l,b,h
+	using Sphere = Container<1, TYPE::SPHERE>;			//radius
+	using Circle = Container<1, TYPE::CIRCLE>;			//radius
+	using Rectangle = Container<2, TYPE::RECTANGLE>;	//l, b
 }
