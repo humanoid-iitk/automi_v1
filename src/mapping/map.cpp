@@ -5,56 +5,89 @@
 #include<automi_v1/map.h>
 #include<automi_v1/object.h>
 
-namespace huro{
-    Map::Map():automi(Bot()){
-        bot_sub = nh_.subscribe("localisation_topic", 1, &Map::bot_update_cb, this);
-        object_sub = nh_.subscribe("object_rec_topic", 1, &Map::object_update_cb, this);
+namespace huro::Map{
+
+    automi_v1::map toMapMsg(const Map& map){
+        automi_v1::map msg;
+        Eigen::Vector3d bot_pos = map.botPos();
+        msg.bot_pos .x = bot_pos(0);
+        msg.bot_pos .x = bot_pos(1);
+        msg.bot_pos .x = bot_pos(2);
+
+        for (Container* box : map.objects){
+            automi_v1::object obj;
+            obj.pos.x = box->pos(0);
+            obj.pos.y = box->pos(1);
+            obj.pos.z = box->pos(2);
+
+            obj.type = static_cast<uint8_t>(box->type());
+            
+            msg.objects.push_back(obj);
+        }
+        
+        return msg;
+    }
+
+    Map::Map():automi(Bot()){}
+
+    map_manager::map_manager():map_(Map()){
+        bot_sub = nh_.subscribe("localisation_topic", 1, &map_manager::bot_update_cb, this);
+        object_sub = nh_.subscribe("object_rec_topic", 1, &map_manager::object_update_cb, this);
         map_pub = nh_.advertise<automi_v1::map>("map_topic", 1);
     }
 
-    void Map::update(const Eigen::Vector3d& pos, const Eigen::Vector3d& orient, const TYPE type){
+    void map_manager::update(const Eigen::Vector3d& pos, const Eigen::Vector3d& orient, const TYPE type){
+        Container* obj = NULL;
         switch (type){
         case TYPE::BOX:{
-            Box box(pos, orient);
-            boxes.push_back(box);
+            obj = new Box(pos, orient);
         }
         break;
         case TYPE::CIRCLE:{
-            Circle circle(pos, orient);
-            circles.push_back(circle);
+            obj = new Circle(pos, orient);
         }
             break;
         case TYPE::RECTANGLE:{
-            Rectangle rectangle(pos, orient);
-            rectangles.push_back(rectangle);
+            obj = new Rectangle(pos, orient);
         }
             break;
         case TYPE::SPHERE:{
-            Sphere sphere(pos, orient);
-            spheres.push_back(sphere);
+            obj = new Sphere(pos, orient);
         }
             break;
         default:
-            //Report error and exit
-            return;
+            //Report error
+            break;
+        }
+
+        if (obj != NULL){
+            map_.objects.push_back(obj);
         }
 
         //publish updated map
+        map_pub.publish(toMapMsg(map_));
+        return;
     }
 
-    void Map::updateBot(const Eigen::Vector3d& pos){
-        automi.pos = pos;
+    void map_manager::updateBot(const Eigen::Vector3d& pos){
+        map_.automi.update(pos);
         //bot orient???
         
         //publish updated map
+        map_pub.publish(toMapMsg(map_));
+        return;
     }
 
-    void Map::bot_update_cb(const geometry_msgs::Vector3::ConstPtr& msg){
-
+    void map_manager::bot_update_cb(const geometry_msgs::Vector3::ConstPtr& msg){
+        Eigen::Vector3d pos(msg->x, msg->y, msg->z);
+        updateBot(pos);
+        return;
     }
 
-    void Map::object_update_cb(const automi_v1::object::ConstPtr& msg){
-        
+    void map_manager::object_update_cb(const automi_v1::object::ConstPtr& msg){
+        Eigen::Vector3d pos(msg->pos.x, msg->pos.y, msg->pos.z);
+        Eigen::Vector3d orient(msg->orient.x, msg->orient.y, msg->orient.z);
+        update(pos, orient, static_cast<TYPE>(msg->type));
     }
 }
 
