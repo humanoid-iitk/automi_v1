@@ -17,12 +17,9 @@ int main(int argc, char**argv){
     while (ros::ok()){
         cv::Mat depth = gen.calc_depth();
         if (depth.rows > 0 && depth.cols > 0){
-            cv::Mat deptht;
-            cv::ximgproc::getDisparityVis(depth, deptht, 5);
- 
-            // cv::medianBlur(deptht, depth, 15);
-            // std::cout << depth << std::endl;
-            cv::imshow("depth", deptht);
+            // cv::ximgproc::getDisparityVis(depth, deptht, 5);
+
+            cv::imshow("depth", depth);
             cv::waitKey(10);
         }
         // std::cout << depth << std::endl;

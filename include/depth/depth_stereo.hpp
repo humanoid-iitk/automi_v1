@@ -21,7 +21,7 @@ namespace huro{
             const int num_disparities_ = 4*16;
             const int block_size_ = 11;
             const float focus_ = 1.3962; 
-            const float baseline_ = 1;
+            const float baseline_ = 10;
             const int lambda_ = 8000;       //Got to configure these values properly
             const int sigma_ = 5;   
 
@@ -35,6 +35,7 @@ namespace huro{
 
             image_transport::Subscriber image_left_sub_;
             image_transport::Subscriber image_right_sub_; 
+            image_transport::Publisher depth_pub_;
     };
 
 }

@@ -4,6 +4,7 @@
 #include<opencv2/calib3d.hpp>
 #include<depth_stereo.hpp>
 #include<sensor_msgs/Image.h>
+#include<std_msgs/Header.h>
 #include<sensor_msgs/image_encodings.h>
 #include<cv_bridge/cv_bridge.h>
 #include<image_transport/image_transport.h>
@@ -15,8 +16,9 @@ namespace huro{
                                      const std::string& image_left_topic, 
                                      const std::string& image_right_topic)
     : it_(nh) {
-        image_left_sub_ = it_.subscribe(image_left_topic, 1, &depth_generator::left_update_callback, this);
-        image_right_sub_ = it_.subscribe(image_right_topic, 1, &depth_generator::right_update_callback, this);
+        image_left_sub_ = it_.subscribe(image_left_topic, 2, &depth_generator::left_update_callback, this);
+        image_right_sub_ = it_.subscribe(image_right_topic, 2, &depth_generator::right_update_callback, this);
+        depth_pub_ = it_.advertise("/automi/depth", 2);
     }
 
     void depth_generator::left_update_callback(const sensor_msgs::ImageConstPtr& left){
@@ -67,7 +69,7 @@ namespace huro{
             wls_filter->filter(temp_l, im_left_, temp_d, temp_r);
             
             temp_d.convertTo(disparity, CV_32F);
-            // disparity = disparity/16;
+            disparity = disparity/16;
 
             for (int i=0; i<disparity.rows; i++){
                 float* di = disparity.ptr<float>(i);
@@ -78,10 +80,12 @@ namespace huro{
             }
         }
 
-        // cv::Mat depth = (focus_ * baseline_)/disparity;
+        cv::Mat depth = (focus_ * baseline_)/disparity;
+        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "TYPE_32FC1", depth).toImageMsg();
+        depth_pub_.publish(msg);
         // cv::Mat depth = disparity;
-        cv::Mat depth;
-        disparity.convertTo(depth, CV_16S);
+        // cv::Mat depth;
+        // disparity.convertTo(depth, CV_16S);
         return depth;
     }
 }

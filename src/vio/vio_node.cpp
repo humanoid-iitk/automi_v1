@@ -4,7 +4,8 @@
 int main(int argc, char** argv){
     ros::init(argc, argv, "vio_node");
     ros::NodeHandle nh;
-    huro::vio_estimator vio(nh, cv::Mat(), "/husky/camera1/image_raw", "/imu/data");
+    float data[9] = {1.389, 0, 320, 0, 1.389, 240, 0, 0, 1};
+    huro::vio_estimator vio(nh, cv::Mat(cv::Size(3, 3), CV_32FC1, data), "/husky/camera1/image_raw", "/automi/depth", "/imu/data");
 
     ros::spin();
     return 0;

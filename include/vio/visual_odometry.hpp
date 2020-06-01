@@ -16,5 +16,7 @@ namespace huro{
                          const std::vector<cv::KeyPoint>& kp1, 
                          const std::vector<cv::KeyPoint>& kp2,
                          const cv::InputArray K,                    //camera matrix
-                         cv::Mat& rmat, cv::Mat&tvect);
+                         cv::Mat& rmat, cv::Mat&tvect, 
+                         const cv::Mat& depth1,
+                         const cv::Mat& depth2);
 }
