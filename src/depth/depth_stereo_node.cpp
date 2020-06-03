@@ -16,12 +16,12 @@ int main(int argc, char**argv){
 
     while (ros::ok()){
         cv::Mat depth = gen.calc_depth();
-        if (depth.rows > 0 && depth.cols > 0){
-            // cv::ximgproc::getDisparityVis(depth, deptht, 5);
-
-            cv::imshow("depth", depth);
-            cv::waitKey(10);
-        }
+        // if (depth.rows > 0 && depth.cols > 0){
+        //     // cv::Mat deptht;
+        //     // cv::ximgproc::getDisparityVis(depth, deptht, 4);
+        //     cv::imshow("depth", depth);
+        //     cv::waitKey(1);
+        // }
         // std::cout << depth << std::endl;
         ros::spinOnce();
     }

@@ -31,9 +31,16 @@ namespace huro{
             return;
         }
         // im_left_ = ptr->image;
+        // cv::Mat im_left;
         cvtColor(ptr->image, im_left_, cv::COLOR_BGR2GRAY);
-        if (im_left_.rows > 0 && im_left_.cols > 0)
+        // if (im_left.rows > 0 && im_left.cols > 0){
+        //     cv::resize(im_left, im_left_, cv::Size(im_left.cols/2, im_left.rows/2));
+        //     cv::imshow("left", im_left_);
+        // }
+        if (im_left_.rows>0 && im_left_.cols){
             cv::imshow("left", im_left_);
+            cv::waitKey(1);
+        }
         return;
     }
 
@@ -47,9 +54,16 @@ namespace huro{
             return;
         }
         // im_right_ = ptr->image;
+        // cv::Mat im_right;
         cvtColor(ptr->image, im_right_, cv::COLOR_BGR2GRAY);
-        if (im_right_.rows > 0 && im_right_.cols > 0)
+        // if (im_right.rows > 0 && im_right.cols > 0){
+        //     // cv::resize(im_right, im_right_, cv::Size(im_right.cols/2, im_right.rows/2));
+        //     cv::imshow("right", im_right_);
+        // }
+        if (im_right_.rows>0 && im_right_.cols>0){
             cv::imshow("right", im_right_);
+            cv::waitKey(1);
+        }
         return;
     }
 
@@ -81,9 +95,10 @@ namespace huro{
         }
 
         cv::Mat depth = (focus_ * baseline_)/disparity;
-        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "TYPE_32FC1", depth).toImageMsg();
+        // std::cout << depth.cols << std::endl;
+        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "32FC1", depth).toImageMsg();
         depth_pub_.publish(msg);
-        // cv::Mat depth = disparity;
+
         // cv::Mat depth;
         // disparity.convertTo(depth, CV_16S);
         return depth;

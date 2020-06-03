@@ -45,9 +45,9 @@ namespace huro{
         im_k_1_ = im_k_;
         cv::cvtColor(ptr->image, im_k_, cv::COLOR_BGR2GRAY);
         if (im_k_.cols>0 && im_k_.rows>0 && im_k_1_.cols>0 && im_k_1_.rows>0){
-            cv::imshow("current", im_k_);
-            cv::imshow("prev", im_k_1_);
-            cv::waitKey(5);
+            // cv::imshow("current", im_k_);
+            // cv::imshow("prev", im_k_1_);
+            // cv::waitKey(5);
             update();
         }
         return;
@@ -56,7 +56,7 @@ namespace huro{
     void vio_estimator::depth_update_cb(const sensor_msgs::ImageConstPtr& msg){
         cv_bridge::CvImagePtr ptr;
         try{
-            ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_64FC1);
+            ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_32FC1);
         }
         catch(cv_bridge::Exception e){
             ROS_ERROR("cv bridge exception: %s", e.what());    
@@ -88,13 +88,15 @@ namespace huro{
     }
 
     void vio_estimator::update(){
+        if (depth_k_1_.rows==0 || depth_k_.rows==0)
+            return;
         std::vector<cv::KeyPoint> kp1, kp2;
         cv::Mat des1, des2, rmat, tvect;
-        extract_features(im_k_, kp1, des1);
-        extract_features(im_k_1_, kp2, des2);
+        extract_features(im_k_1_, kp1, des1);
+        extract_features(im_k_, kp2, des2);
         std::vector<std::vector<cv::DMatch>> matches = match_features(des1, des2);
         std::vector<cv::DMatch> filtered = filter_matches(matches);
-        estimate_motion(filtered, kp1, kp2, K_, rmat, tvect, cv::Mat(), cv::Mat());
+        estimate_motion(filtered, kp1, kp2, K_, rmat, tvect, depth_k_1_, depth_k_);
 
         //find absolute position in ground frame. 
         cv::Mat r_inv_ = rmat.inv();
@@ -103,7 +105,8 @@ namespace huro{
         r_inv_.convertTo(r_inv, CV_32FC1);
         R = R * r_inv;
         t = t + R * t_vect;
-        std::cout << rmat << std::endl;
-        std::cout << tvect << std::endl;
+        std::cout << R << std::endl;
+        std::cout << t << std::endl;
+        std::cout << tvect << std::endl << std::endl;
     }
 }

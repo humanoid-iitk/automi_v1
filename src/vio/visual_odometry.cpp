@@ -38,17 +38,19 @@ namespace huro{
         return filtered_match;
     }
 
-    std::vector<cv::Point3f> getObjectPoints(const std::vector<cv::Point2i>& image_points, const cv::Mat& depth){
+    std::vector<cv::Point3f> getObjectPoints(const std::vector<cv::Point2f>& image_points, const cv::Mat& depth, std::vector<cv::Point2f>& filtered){
         std::vector<cv::Point3f> obj_points;
 
         for (cv::Point2i pt: image_points){
             float Z = (depth.ptr<float>(pt.x))[pt.y];
+            if (Z > 1e2) continue;
             cv::Point3f pt_3(
                 (pt.x-cx)*Z/f,
                 (pt.y-cy)*Z/f, 
                 Z
             );
             obj_points.push_back(pt_3);
+            filtered.push_back(pt);
         }
 
         return obj_points;
@@ -62,23 +64,28 @@ namespace huro{
                          const cv::Mat& depth1,
                          const cv::Mat& depth2){          
         
-        std::vector<cv::Point2i> image1_points, image2_points;
-        
+        std::vector<cv::Point2f> image1_points, image2_points;
+        std::vector<cv::Point2f> image1_points_filtered, image2_points_filtered;
+
         for (cv::DMatch match: matches){
             int train_idx = match.trainIdx;
             int query_idx = match.queryIdx;
             
-            cv::Point2i p1 = kp1[query_idx].pt;
+            cv::Point2f p1 = static_cast<cv::Point2f>(kp1[query_idx].pt);
             image1_points.push_back(p1);
-            cv::Point2i p2 = kp2[train_idx].pt;
+            cv::Point2f p2 = static_cast<cv::Point2f>(kp2[query_idx].pt);
             image2_points.push_back(p2);
         }
 
         cv::Mat rvect1, rvect2, tvect1, tvect2;
-        std::vector<cv::Point3f> object_points1 = getObjectPoints(image1_points, depth1);
-        std::vector<cv::Point3f> object_points2 = getObjectPoints(image2_points, depth2);
-        cv::solvePnPRansac(object_points1, image1_points, K, cv::Mat(), rvect1, tvect1);
-        cv::solvePnPRansac(object_points2, image2_points, K, cv::Mat(), rvect2, tvect2);
+        std::vector<cv::Point3f> object_points1 = getObjectPoints(image1_points, depth1, image1_points_filtered);
+        std::vector<cv::Point3f> object_points2 = getObjectPoints(image2_points, depth2, image2_points_filtered);
+
+        if (object_points1.size() == 0 || object_points2.size() == 0)                   //safeguards fucking me up
+            return;
+
+        cv::solvePnPRansac(object_points1, image1_points_filtered, K, cv::Mat(), rvect1, tvect1);
+        cv::solvePnPRansac(object_points2, image2_points_filtered, K, cv::Mat(), rvect2, tvect2);
 
         cv::Mat RPNP1, RPNP2;
         cv::Rodrigues(rvect1, RPNP1);
@@ -86,6 +93,7 @@ namespace huro{
 
         rmat = RPNP1.inv() * RPNP2;
         tvect = RPNP2 * tvect2 - RPNP1 * tvect1;  
+
         // cv::Mat emat = cv::findEssentialMat(image1_points, image2_points, K);
         // cv::Mat rmat_temp, tvect_temp;
         // cv::recoverPose(emat, image1_points, image2_points, K, rmat_temp, tvect_temp);
