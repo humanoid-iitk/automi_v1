@@ -12,7 +12,7 @@ int main(int argc, char**argv){
     ros::init(argc, argv, "depth_stereo");
     ros::NodeHandle nh;
 
-    huro::depth_generator gen(nh, "/husky/camera1/image_raw", "/husky/camera2/image_raw");
+    huro::depth_generator gen(nh, "image1", "image2");
 
     while (ros::ok()){
         cv::Mat depth = gen.calc_depth();

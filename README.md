@@ -24,6 +24,25 @@ unzip automi_v1.zip
 
 Place the project folder into your ros workspace and build using catkin_make.
 
+### 3. FOR DEVELOPMENT PERIOD
+
+1. Replace the file present at husky_description/urdf/ with "husky.urdf.xacro" present in this repo.
+
+2. Run husky in playpen world:
+
+```bash
+roslaunch husky_gazebo playpen.launch
+roslaunch husky_gazebo spawn_husky.launch   # on a separate terminal
+```
+
+3. Modify the launch file present in launch folder according to needs and run this:
+
+```bash
+roslaunch automi_v1 ${launch_file_name}
+```
+
+Remember to source devel/setup.bash
+
 ## Contribution Guidelines
 
 ### 1. Fork the repo on GitHub: Use the button at the top right

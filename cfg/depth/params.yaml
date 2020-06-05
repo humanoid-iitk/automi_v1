@@ -1,8 +1,15 @@
 #depth parameters
 
-focus: 1.000                        #focal length in meters 1.3962
+focus: 1.392                        #focal length in meters 
 baseline: 0.05                      #in meters
+block_size: 7                       #parameter for stereo matcher
+num_disparities: 32                 #parameter for stereo matcher 
+                                    #CAUTION: use factor of 16.
+
+use_disparity_filter: True          #If set to true, a filter is applied 
+                                    #to smoothen disparity maps
+                                    #The filter increases computation
+                                    #to a large extent.
+                                    
 lambda: 8000                        #parameter for disparity filter
 sigma: 5                            #parameter for disparity filter 
-block_size: 7                       #parameter for stereo matcher
-num_disparities_factor: 2           #parameter for stereo matcher

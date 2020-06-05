@@ -14,14 +14,21 @@
 namespace huro{
     depth_generator::depth_generator(const ros::NodeHandle& nh, 
                                      const std::string& image_left_topic, 
-                                     const std::string& image_right_topic)
-    : it_(nh) {
+                                     const std::string& image_right_topic):
+    it_(nh),
+    nh_private_(ros::NodeHandle("~")),
+    it_private_(nh_private_)
+    {
         image_left_sub_ = it_.subscribe(image_left_topic, 2, &depth_generator::left_update_callback, this);
         image_right_sub_ = it_.subscribe(image_right_topic, 2, &depth_generator::right_update_callback, this);
-        depth_pub_ = it_.advertise("/automi/depth", 2);
-        nh.getParam("focus", focus_);
-        nh.getParam("baseline", baseline_);
-        std::cout << focus_ << std::endl;
+        depth_pub_ = it_private_.advertise("depth", 2);
+        nh_private_.getParam("focus", focus_);
+        nh_private_.getParam("baseline", baseline_);
+        nh_private_.getParam("block_size", focus_);
+        nh_private_.getParam("num_disparities", num_disparities_);
+        nh_private_.getParam("use_disparity_filter", USE_FILTER);
+        nh_private_.getParam("lambda", lambda_);
+        nh_private_.getParam("sigma", sigma_);
     }
 
     void depth_generator::left_update_callback(const sensor_msgs::ImageConstPtr& left){
@@ -33,13 +40,8 @@ namespace huro{
             ROS_ERROR("cv bridge exception: %s", e.what());    
             return;
         }
-        // im_left_ = ptr->image;
-        // cv::Mat im_left;
+
         cvtColor(ptr->image, im_left_, cv::COLOR_BGR2GRAY);
-        // if (im_left.rows > 0 && im_left.cols > 0){
-        //     cv::resize(im_left, im_left_, cv::Size(im_left.cols/2, im_left.rows/2));
-        //     cv::imshow("left", im_left_);
-        // }
         if (im_left_.rows>0 && im_left_.cols){
             cv::imshow("left", im_left_);
             cv::waitKey(1);
@@ -56,13 +58,8 @@ namespace huro{
             ROS_ERROR("cv bridge exception: %s", e.what());    
             return;
         }
-        // im_right_ = ptr->image;
-        // cv::Mat im_right;
+
         cvtColor(ptr->image, im_right_, cv::COLOR_BGR2GRAY);
-        // if (im_right.rows > 0 && im_right.cols > 0){
-        //     // cv::resize(im_right, im_right_, cv::Size(im_right.cols/2, im_right.rows/2));
-        //     cv::imshow("right", im_right_);
-        // }
         if (im_right_.rows>0 && im_right_.cols>0){
             cv::imshow("right", im_right_);
             cv::waitKey(1);
@@ -74,18 +71,23 @@ namespace huro{
         static cv::Ptr<cv::StereoBM> left_matcher = cv::StereoBM::create(
             num_disparities_, block_size_
         );
-        static cv::Ptr<cv::StereoMatcher> right_matcher = cv::ximgproc::createRightMatcher(left_matcher);
-        static cv::Ptr<cv::ximgproc::DisparityWLSFilter> wls_filter = cv::ximgproc::createDisparityWLSFilter(left_matcher);
-        wls_filter->setLambda(lambda_);
-        wls_filter->setSigmaColor(sigma_);
-
         cv::Mat disparity, temp_l, temp_r, temp_d;
         if (im_left_.rows > 0 && im_right_.rows>0){
             left_matcher->compute(im_left_, im_right_, temp_l);
-            right_matcher->compute(im_right_, im_left_, temp_r);
-            wls_filter->filter(temp_l, im_left_, temp_d, temp_r);
             
-            temp_d.convertTo(disparity, CV_32F);
+            if (USE_FILTER){
+                static cv::Ptr<cv::StereoMatcher> right_matcher = cv::ximgproc::createRightMatcher(left_matcher);
+                static cv::Ptr<cv::ximgproc::DisparityWLSFilter> wls_filter = cv::ximgproc::createDisparityWLSFilter(left_matcher);
+                wls_filter->setLambda(lambda_);
+                wls_filter->setSigmaColor(sigma_);
+                right_matcher->compute(im_right_, im_left_, temp_r);
+                wls_filter->filter(temp_l, im_left_, temp_d, temp_r);
+                temp_d.convertTo(disparity, CV_32F);
+            }
+            else {
+                temp_l.convertTo(disparity, CV_32F);
+            }
+
             disparity = disparity/16;
 
             for (int i=0; i<disparity.rows; i++){

@@ -18,12 +18,13 @@ namespace huro{
             cv::Mat calc_depth();
 
         protected:
-            const int num_disparities_ = 2*16;
-            const int block_size_ = 5;
-            float focus_; 
-            float baseline_;
-            const int lambda_ = 8000;       //Got to configure these values properly
-            const int sigma_ = 5;   
+            int num_disparities_ = 2*16;
+            int block_size_ = 5;
+            float focus_ = 1.3962; 
+            float baseline_ = 0.05;
+            int lambda_ = 8000;       //Got to configure these values properly
+            int sigma_ = 5; 
+            bool USE_FILTER = true;
 
             void left_update_callback(const sensor_msgs::ImageConstPtr& left);
             void right_update_callback(const sensor_msgs::ImageConstPtr& right);
@@ -32,6 +33,8 @@ namespace huro{
             cv::Mat im_right_;
     
             image_transport::ImageTransport it_;
+            ros::NodeHandle nh_private_;
+            image_transport::ImageTransport it_private_;
 
             image_transport::Subscriber image_left_sub_;
             image_transport::Subscriber image_right_sub_; 
