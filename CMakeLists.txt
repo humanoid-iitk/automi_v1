@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   message_generation
+  roslaunch
 )
 
 find_package(OpenCV 3 REQUIRED)

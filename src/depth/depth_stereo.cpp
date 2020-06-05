@@ -8,7 +8,7 @@
 #include<sensor_msgs/image_encodings.h>
 #include<cv_bridge/cv_bridge.h>
 #include<image_transport/image_transport.h>
-// #include<iostream>
+#include<iostream>
 #include<opencv2/ximgproc/disparity_filter.hpp>
 
 namespace huro{
@@ -19,6 +19,9 @@ namespace huro{
         image_left_sub_ = it_.subscribe(image_left_topic, 2, &depth_generator::left_update_callback, this);
         image_right_sub_ = it_.subscribe(image_right_topic, 2, &depth_generator::right_update_callback, this);
         depth_pub_ = it_.advertise("/automi/depth", 2);
+        nh.getParam("focus", focus_);
+        nh.getParam("baseline", baseline_);
+        std::cout << focus_ << std::endl;
     }
 
     void depth_generator::left_update_callback(const sensor_msgs::ImageConstPtr& left){

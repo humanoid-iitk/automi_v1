@@ -20,8 +20,8 @@ namespace huro{
         protected:
             const int num_disparities_ = 2*16;
             const int block_size_ = 5;
-            const float focus_ = 1.3962; 
-            const float baseline_ = 0.05;
+            float focus_; 
+            float baseline_;
             const int lambda_ = 8000;       //Got to configure these values properly
             const int sigma_ = 5;   
 

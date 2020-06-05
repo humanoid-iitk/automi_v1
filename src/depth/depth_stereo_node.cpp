@@ -9,7 +9,7 @@
 #include<opencv2/ximgproc/disparity_filter.hpp>
 
 int main(int argc, char**argv){
-    ros::init(argc, argv, "depth_node");
+    ros::init(argc, argv, "depth_stereo");
     ros::NodeHandle nh;
 
     huro::depth_generator gen(nh, "/husky/camera1/image_raw", "/husky/camera2/image_raw");

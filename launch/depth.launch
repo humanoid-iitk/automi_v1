@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="bot_name"      default="automi_v1"/>
+
+  <group ns="$(arg bot_name)">
+    <node name="depth_stereo" pkg="automi_v1" type="depth_stereo_node" output="screen" clear_params="true" respawn="true">
+        <!-- <remap from="frontier_evaluator/tsdf_map_in" to="tsdf_map" /> -->
+
+        <!-- <rosparam file="$(find voxblox_global_planner)/cfg/params.yaml" command="load" /> -->
+        <rosparam file="$(find automi_v1)/cfg/depth/params.yaml" command="load" />
+    </node>
+  </group>
+
+</launch>
