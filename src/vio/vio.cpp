@@ -4,6 +4,7 @@
 #include<sensor_msgs/image_encodings.h>
 #include<sensor_msgs/Imu.h>
 #include<cv_bridge/cv_bridge.h>
+#include<geometry_msgs/Vector3.h>
 #include<eigen3/Eigen/Dense>
 #include<string>
 #include<opencv2/opencv.hpp>
@@ -22,6 +23,8 @@ namespace huro{
         image_sub_ = it_.subscribe(image_topic, 2, &vio_estimator::image_update_cb, this);
         depth_sub_ = it_.subscribe(depth_topic, 2, &vio_estimator::depth_update_cb, this);
         imu_sub_ = nh_.subscribe(imu_topic, 2, &vio_estimator::imu_update_cb, this);
+
+        vio_pub_ = nh_.advertise<geometry_msgs::Vector3>("/automi/odometry", 2);
 
         pos_k_1_ << 0, 0, 0;
         vel_k_1_ << 0, 0, 0;
@@ -104,9 +107,22 @@ namespace huro{
         tvect.convertTo(t_vect, CV_32FC1);
         r_inv_.convertTo(r_inv, CV_32FC1);
         R = R * r_inv;
+
+        //R is the absolute rotation matrix 
+        //likewise t is the absolute translation vector
+        //fuse this with the acceleration obtained from IMU data. 
+        //kalman filter problem 
+
+        //fuse this rotation(r_inv) with the one obtained from IMU
+        //use fused rotation to get absolute R = R*r_inv
+
+        //fuse translation(t_vect) with IMU data to get t
+        //use husky playpen world to test 
+
         t = t + R * t_vect;
         std::cout << R << std::endl;
         std::cout << t << std::endl;
         std::cout << tvect << std::endl << std::endl;
+
     }
 }

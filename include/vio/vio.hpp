@@ -46,5 +46,6 @@ namespace huro{
             image_transport::Subscriber image_sub_;
             image_transport::Subscriber depth_sub_;
             ros::Subscriber imu_sub_;
+            ros::Publisher vio_pub_;
     };
 }

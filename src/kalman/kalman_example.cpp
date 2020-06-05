@@ -2,7 +2,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-#include "kalman.hpp"
+#include <kalman.hpp>
 
 int main(int argc, char* argv[]) {
 
