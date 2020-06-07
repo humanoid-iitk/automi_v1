@@ -5,6 +5,8 @@
 #include<utility>
 #include<vector>
 #include<map>
+#include<automi_v1/object.h>
+#include<automi_v1/dimension.h>
 
 namespace huro::Map{
 
@@ -33,10 +35,23 @@ namespace huro::Map{
 					pos_(pos), 
 					orient_(orient), 
 					type_(type){}
+
+			static Container create(const Eigen::Vector3d& pos, 
+                            const Eigen::Vector3d& orient,
+                            const TYPE& type);
+
+			static Container create(const Eigen::Vector3d& pos, 
+                            const Eigen::Vector3d& orient,
+                            const TYPE& type,
+                            const std::vector<automi_v1::dimension>& dims);
+
+			static automi_v1::object objToMsg(const Container& obj);
+			static Container msgToObj(const automi_v1::object& msg);
 			
 			virtual Eigen::Vector3d pos() const {return pos_;}
 			virtual double pos(int index) const {return pos_(index);}
-			virtual Eigen::Vector3d orient() const {return orient_;} 
+			virtual Eigen::Vector3d orient() const {return orient_;}
+			virtual double orient(int index) const {return orient_(index);} 
 			virtual TYPE type() const {return type_;}
 			virtual std::map<std::string, std::pair<float, float>> getDims(){return dims_;}
 

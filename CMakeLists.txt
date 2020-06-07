@@ -58,6 +58,7 @@ find_package(Eigen3 REQUIRED)
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
+  dimension.msg
   object.msg
   map.msg
 )
@@ -162,8 +163,9 @@ add_library(
   src/vio/visual_odometry.cpp
   src/vio/vio.cpp
   src/kalman/kalman.cpp
-  # src/mapping/container.cpp 
+  src/mapping/container.cpp 
   src/mapping/map.cpp
+  src/mapping/map_manager.cpp
   src/planner/planner.cpp
 )
 
