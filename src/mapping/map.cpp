@@ -10,22 +10,26 @@ namespace huro::Map{
     automi_v1::map toMapMsg(const Map& map){
         automi_v1::map msg;
         Eigen::Vector3d bot_pos = map.botPos();
-        msg.bot_pos .x = bot_pos(0);
-        msg.bot_pos .x = bot_pos(1);
-        msg.bot_pos .x = bot_pos(2);
+        msg.bot_pos.x = bot_pos(0);
+        msg.bot_pos.y = bot_pos(1);
+        msg.bot_pos.z = bot_pos(2);
 
-        for (Container* box : map.objects){
+        for (Container box : map.objects){
             automi_v1::object obj;
-            obj.pos.x = box->pos(0);
-            obj.pos.y = box->pos(1);
-            obj.pos.z = box->pos(2);
+            obj.pos.x = box.pos(0);
+            obj.pos.y = box.pos(1);
+            obj.pos.z = box.pos(2);
 
-            obj.type = static_cast<uint8_t>(box->type());
-            
+            obj.type = static_cast<uint8_t>(box.type());
+            // obj.dims = box->dims_;
             msg.objects.push_back(obj);
         }
         
         return msg;
+    }
+
+    Map msgToMap(const automi_v1::map::ConstPtr){
+        return Map();
     }
 
     Map::Map():automi(Bot()){}
@@ -37,32 +41,9 @@ namespace huro::Map{
     }
 
     void map_manager::update(const Eigen::Vector3d& pos, const Eigen::Vector3d& orient, const TYPE type){
-        Container* obj = NULL;
-        switch (type){
-        case TYPE::BOX:{
-            obj = new Box(pos, orient);
-        }
-        break;
-        case TYPE::CIRCLE:{
-            obj = new Circle(pos, orient);
-        }
-            break;
-        case TYPE::RECTANGLE:{
-            obj = new Rectangle(pos, orient);
-        }
-            break;
-        case TYPE::SPHERE:{
-            obj = new Sphere(pos, orient);
-        }
-            break;
-        default:
-            //Report error
-            break;
-        }
-
-        if (obj != NULL){
-            map_.objects.push_back(obj);
-        }
+        Container obj = Container(pos, orient, type);
+        
+        map_.objects.push_back(obj);
 
         //publish updated map
         map_pub.publish(toMapMsg(map_));

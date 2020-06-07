@@ -22,7 +22,7 @@ namespace huro::Map{
 
 		protected:
 			Bot automi;
-			std::vector<Container*> objects;
+			std::vector<Container> objects;
 	};
 
 	class map_manager{

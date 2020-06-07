@@ -119,6 +119,7 @@ catkin_package(
  include/vio 
  include/depth 
  include/kalman
+ include/planner
  include/${PROJECT_NAME}
   
  LIBRARIES huro
@@ -147,6 +148,7 @@ include_directories(
   include/mapping
   include/depth
   include/vio
+  include/planner
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
@@ -162,6 +164,7 @@ add_library(
   src/kalman/kalman.cpp
   # src/mapping/container.cpp 
   src/mapping/map.cpp
+  src/planner/planner.cpp
 )
 
 ## Add cmake target dependencies of the library
