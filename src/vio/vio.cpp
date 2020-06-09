@@ -10,6 +10,7 @@
 #include<opencv2/opencv.hpp>
 #include<iostream>
 #include<kalman.hpp>
+#include"KalmanWraper.cpp"
 
 namespace huro{
     vio_estimator::vio_estimator(const ros::NodeHandle& nh, 
@@ -123,6 +124,16 @@ namespace huro{
         std::cout << R << std::endl;
         std::cout << t << std::endl;
         std::cout << tvect << std::endl << std::endl;
+
+        translation t = translation();
+        KalmanFilter kf_Translation(t.A, t.B, t.C, t.Q, t.R, t.P);
+        kf_Translation.init();
+
+        rotation r = rotation();
+        KalmanFilter kf_rotation(r.A, r.B, r.C, r.Q, r.R, r.P);
+        kf_rotation.init();
+
+        
 
     }
 }
