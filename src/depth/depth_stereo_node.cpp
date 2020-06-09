@@ -15,7 +15,11 @@ int main(int argc, char**argv){
     huro::depth_generator gen(nh, "image1", "image2");
 
     while (ros::ok()){
-        cv::Mat depth = gen.calc_depth();
+        cv::Mat depth = cv::Mat::zeros(5, 5, CV_64FC1);      
+        cv::Mat disparity = cv::Mat::zeros(5, 5, CV_64FC1); 
+        gen.calc_depth(depth, disparity);
+
+        std::cout << depth;
         // if (depth.rows > 0 && depth.cols > 0){
         //     // cv::Mat deptht;
         //     // cv::ximgproc::getDisparityVis(depth, deptht, 6);

@@ -1,10 +1,10 @@
 #pragma once
 
 #include<eigen3/Eigen/Dense>
-#include<array>
 #include<utility>
 #include<vector>
 #include<map>
+
 #include<automi_v1/object.h>
 #include<automi_v1/dimension.h>
 
@@ -47,6 +47,7 @@ namespace huro::Map{
 
 			static automi_v1::object objToMsg(const Container& obj);
 			static Container msgToObj(const automi_v1::object& msg);
+			static Container msgToObj(const automi_v1::object::ConstPtr& msg);
 			
 			virtual Eigen::Vector3d pos() const {return pos_;}
 			virtual double pos(int index) const {return pos_(index);}

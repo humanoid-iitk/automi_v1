@@ -1,40 +1,91 @@
 #include<map_manager.hpp>
+#include<cv_bridge/cv_bridge.h>
 
 namespace huro::Map{
-    map_manager::map_manager():map_(Map()){
-        bot_sub = nh_.subscribe("localisation_topic", 1, &map_manager::bot_update_cb, this);
-        object_sub = nh_.subscribe("object_rec_topic", 1, &map_manager::object_update_cb, this);
-        map_pub = nh_.advertise<automi_v1::map>("map_topic", 1);
-    }
+    manager::manager():
+        nh_private_(ros::NodeHandle("~"))
+        {
+            bot_sub_ = nh_.subscribe("localisation_topic", 2, &manager::bot_update_cb, this);
+            map_pub_ = nh_private_.advertise<automi_v1::map>("map", 2);
+        }
 
-    void map_manager::update(const Eigen::Vector3d& pos, const Eigen::Vector3d& orient, const TYPE type){
-        Container obj = Container(pos, orient, type);
-        
-        map_.objects.push_back(obj);
-
-        //publish updated map
-        map_pub.publish(Map::mapToMsg(map_));
-        return;
-    }
-
-    void map_manager::updateBot(const Eigen::Vector3d& pos){
+    void manager::bot_update_cb(const geometry_msgs::Vector3::ConstPtr& msg){
+        Eigen::Vector3d pos = Eigen::Vector3d(msg->x,
+                                              msg->y,
+                                              msg->z);
         map_.automi.update(pos);
-        //bot orient???
+        map_pub_.publish(Map::mapToMsg(map_));
+        return;
+    }
+
+    manager_auto::manager_auto():
+        manager(),
+        it_(nh_){
+            image_sub_ = it_.subscribe("image", 2, &manager_auto::image_update_cb, this);
+            depth_sub_ = it_.subscribe("depth", 2, &manager_auto::depth_update_cb, this);
+        }
+
+    void manager_auto::image_update_cb(const sensor_msgs::ImageConstPtr& msg){
+        cv_bridge::CvImagePtr ptr;
+        try{
+            ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        }
+        catch(cv_bridge::Exception e){
+            ROS_ERROR("cv bridge exception: %s", e.what());    
+            return;
+        }
         
-        //publish updated map
-        map_pub.publish(Map::mapToMsg(map_));
+        image_ = ptr->image;
         return;
     }
 
-    void map_manager::bot_update_cb(const geometry_msgs::Vector3::ConstPtr& msg){
-        Eigen::Vector3d pos(msg->x, msg->y, msg->z);
-        updateBot(pos);
+    void manager_auto::depth_update_cb(const sensor_msgs::ImageConstPtr& msg){
+        cv_bridge::CvImagePtr ptr;
+        try{
+            ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_32FC1);
+        }
+        catch(cv_bridge::Exception e){
+            ROS_ERROR("cv bridge exception: %s", e.what());    
+            return;
+        }
+
+        depth_ = ptr->image;
         return;
     }
 
-    void map_manager::object_update_cb(const automi_v1::object::ConstPtr& msg){
-        Eigen::Vector3d pos(msg->pos.x, msg->pos.y, msg->pos.z);
-        Eigen::Vector3d orient(msg->orient.x, msg->orient.y, msg->orient.z);
-        update(pos, orient, static_cast<TYPE>(msg->type));
+    std::vector<Container> manager_auto::sense(){
+        std::vector<Container> objects;
+        //algorithm goes here
+
+        return objects;
+    }
+
+    //utility function
+    void manager_auto::update(const Container& obj){
+        map_.update(obj);
+        return;
+    }
+
+    void manager_auto::senseAndUpdate(){
+        std::vector<Container> objects = sense();
+        for (auto obj: objects){
+            map_.update(obj);
+        }
+
+        map_pub_.publish(Map::mapToMsg(map_));
+        return;
+    }
+
+    manager_manual::manager_manual():
+        manager(){
+            object_sub_ = nh_.subscribe("object", 2, &manager_manual::object_update_cb, this);
+        }
+    
+    void manager_manual::object_update_cb(const automi_v1::object::ConstPtr& msg){
+        Container obj = Container::msgToObj(msg);
+        map_.update(obj);
+
+        map_pub_.publish(Map::mapToMsg(map_));
+        return;
     }
 }

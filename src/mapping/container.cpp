@@ -57,5 +57,12 @@ namespace huro::Map{
         return obj;
     }
 
+    Container Container::msgToObj(const automi_v1::object::ConstPtr& msg){
+        Eigen::Vector3d pos(msg->pos.x, msg->pos.y, msg->pos.z);
+        Eigen::Vector3d orient(msg->orient.x, msg->orient.y, msg->orient.z);
+        Container obj = Container::create(pos, orient, static_cast<TYPE>(msg->type), msg->dims);
+        return obj;
+    }
+
 
 }
