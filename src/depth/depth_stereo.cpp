@@ -43,13 +43,13 @@ namespace huro{
         image_right_sub_ = it_.subscribe(image_right_topic, 2, &depth_generator::left_update_callback, this);
         depth_pub_ = it_private_.advertise("depth", 2);
             
-        float focus = params.at("focus");
-        float baseline = params.at("baseline");
-        int block_size = params.at("block_size");
-        int num_disparities = params.at("num_disparities");
-        int lambda = params.at("lambda");
-        int sigma = params.at("sigma");
-        bool USE_FILTER = params.at("USE_FILTER");
+        focus_ = params.at("focus");
+        baseline_ = params.at("baseline");
+        block_size_ = params.at("block_size");
+        num_disparities_ = params.at("num_disparities");
+        lambda_ = params.at("lambda");
+        sigma_ = params.at("sigma");
+        USE_FILTER = params.at("USE_FILTER");
 
     }
 
@@ -89,7 +89,8 @@ namespace huro{
         return;
     }
 
-    cv::Mat depth_generator::calc_depth(){
+    cv::Mat depth_generator::calc_depth()
+    {
         static cv::Ptr<cv::StereoBM> left_matcher = cv::StereoBM::create(
             num_disparities_, block_size_
         );
