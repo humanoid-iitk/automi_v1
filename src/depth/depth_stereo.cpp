@@ -31,6 +31,28 @@ namespace huro{
         nh_private_.getParam("sigma", sigma_);
     }
 
+    depth_generator::depth_generator(const ros::NodeHandle& nh,
+                                      const std::string& image_left_topic,
+                                      const std::string& image_right_topic,
+                                      const std::map<std::string, float>& params):
+        it_(nh),
+        nh_private_(ros::NodeHandle("~")),
+        it_private_(nh_private_)
+    {
+        image_left_sub_ = it_.subscribe(image_left_topic, 2, &depth_generator::left_update_callback, this);
+        image_right_sub_ = it_.subscribe(image_right_topic, 2, &depth_generator::left_update_callback, this);
+        depth_pub_ = it_private_.advertise("depth", 2);
+            
+        float focus = params.at("focus");
+        float baseline = params.at("baseline");
+        int block_size = params.at("block_size");
+        int num_disparities = params.at("num_disparities");
+        int lambda = params.at("lambda");
+        int sigma = params.at("sigma");
+        bool USE_FILTER = params.at("USE_FILTER");
+
+    }
+
     void depth_generator::left_update_callback(const sensor_msgs::ImageConstPtr& left){
         cv_bridge::CvImagePtr ptr;
         try{

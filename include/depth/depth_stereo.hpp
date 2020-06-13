@@ -14,7 +14,12 @@ namespace huro{
         public:
             depth_generator(const ros::NodeHandle& nh, 
                             const std::string& image_left_topic, 
-                            const std::string& image_right_topic);      //initialise parameters
+                            const std::string& image_right_topic);//initialise parameters
+            
+            depth_generator(const ros::NodeHandle& nh,
+                            const std::string& image_left_topic,
+                            const std::string& image_right_topic,
+                            const std::map<std::string, float>& params);
             cv::Mat calc_depth();
 
         protected:
