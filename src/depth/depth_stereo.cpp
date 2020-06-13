@@ -35,9 +35,9 @@ namespace huro{
                                       const std::string& image_left_topic,
                                       const std::string& image_right_topic,
                                       const std::map<std::string, float>& params):
-        it_(nh),
-        nh_private_(ros::NodeHandle("~")),
-        it_private_(nh_private_)
+    it_(nh),
+    nh_private_(ros::NodeHandle("~")),
+    it_private_(nh_private_)
     {
         image_left_sub_ = it_.subscribe(image_left_topic, 2, &depth_generator::left_update_callback, this);
         image_right_sub_ = it_.subscribe(image_right_topic, 2, &depth_generator::left_update_callback, this);
@@ -89,7 +89,7 @@ namespace huro{
         return;
     }
 
-    cv::Mat depth_generator::calc_depth()
+    void depth_generator::calc_depth(cv::Mat& depth)
     {
         static cv::Ptr<cv::StereoBM> left_matcher = cv::StereoBM::create(
             num_disparities_, block_size_
@@ -122,13 +122,12 @@ namespace huro{
             }
         }
 
-        cv::Mat depth = (focus_ * baseline_)/disparity;
+        depth = (focus_ * baseline_)/disparity;
         // std::cout << depth.cols << std::endl;
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "32FC1", depth).toImageMsg();
         depth_pub_.publish(msg);
 
         // cv::Mat depth;
         // disparity.convertTo(depth, CV_16S);
-        return depth;
     }
 }
