@@ -32,9 +32,9 @@ namespace huro{
     }
 
     depth_generator::depth_generator(const ros::NodeHandle& nh,
+                                      const std::map<std::string, float>& params,
                                       const std::string& image_left_topic,
-                                      const std::string& image_right_topic,
-                                      const std::map<std::string, float>& params):
+                                      const std::string& image_right_topic):
     it_(nh),
     nh_private_(ros::NodeHandle("~")),
     it_private_(nh_private_)
@@ -49,8 +49,10 @@ namespace huro{
         num_disparities_ = params.at("num_disparities");
         lambda_ = params.at("lambda");
         sigma_ = params.at("sigma");
-        USE_FILTER = params.at("USE_FILTER");
+        int filter_float = params.at("USE_FILTER");
 
+        if(filter_float == 1) USE_FILTER = true;
+        else USE_FILTER = false;
     }
 
     void depth_generator::left_update_callback(const sensor_msgs::ImageConstPtr& left){
@@ -89,12 +91,12 @@ namespace huro{
         return;
     }
 
-    void depth_generator::calc_depth(cv::Mat& depth)
+    void depth_generator::calc_depth(cv::Mat& depth, cv::Mat& disparity)
     {
         static cv::Ptr<cv::StereoBM> left_matcher = cv::StereoBM::create(
             num_disparities_, block_size_
         );
-        cv::Mat disparity, temp_l, temp_r, temp_d;
+        cv::Mat temp_l, temp_r, temp_d;
         if (im_left_.rows > 0 && im_right_.rows>0){
             left_matcher->compute(im_left_, im_right_, temp_l);
             
