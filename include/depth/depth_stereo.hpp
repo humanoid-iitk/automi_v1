@@ -33,8 +33,8 @@ namespace huro{
             int sigma_ = 5; 
             bool USE_FILTER = true;
             
-            cv::Mat depth = cv::Mat();
-            cv::Mat disparity = cv::Mat();
+            //cv::Mat depth = cv::Mat();
+            //cv::Mat disparity = cv::Mat();
             void left_update_callback(const sensor_msgs::ImageConstPtr& left);
             void right_update_callback(const sensor_msgs::ImageConstPtr& right);
 
