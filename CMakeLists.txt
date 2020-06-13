@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslaunch
 )
 
-find_package(OpenCV 3 REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
