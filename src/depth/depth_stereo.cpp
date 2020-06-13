@@ -24,7 +24,7 @@ namespace huro{
         depth_pub_ = it_private_.advertise("depth", 2);
         nh_private_.getParam("focus", focus_);
         nh_private_.getParam("baseline", baseline_);
-        nh_private_.getParam("block_size", focus_);
+        nh_private_.getParam("block_size", block_size_);
         nh_private_.getParam("num_disparities", num_disparities_);
         nh_private_.getParam("use_disparity_filter", USE_FILTER);
         nh_private_.getParam("lambda", lambda_);
