@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
 <!--
 Software License Agreement (BSD)
+
 \file      husky.urdf.xacro
 \authors   Paul Bovbel <pbovbel@clearpathrobotics.com>, Devon Ash <dash@clearpathrobotics.com>
 \copyright Copyright (c) 2015, Clearpath Robotics, Inc., All rights reserved.
+
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that
 the following conditions are met:
  * Redistributions of source code must retain the above copyright notice, this list of conditions and the
@@ -12,6 +14,7 @@ the following conditions are met:
    following disclaimer in the documentation and/or other materials provided with the distribution.
  * Neither the name of Clearpath Robotics nor the names of its contributors may be used to endorse or promote
    products derived from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WAR-
 RANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
 PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, IN-
@@ -30,6 +33,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <xacro:arg name="kinect_xyz" default="$(optenv HUSKY_KINECT_XYZ 0 0 0)" />
   <xacro:arg name="kinect_rpy" default="$(optenv HUSKY_KINECT_RPY 0 0.18 3.14)" />
 
+  <xacro:arg name="realsense_enabled" default="false" />
+  <xacro:arg name="realsense_xyz" default="$(optenv HUSKY_REALSENSE_XYZ 0 0 0)" />
+  <xacro:arg name="realsense_rpy" default="$(optenv HUSKY_REALSENSE_RPY 0 0 0)" />
+  <xacro:arg name="realsense_mount" default="$(optenv HUSKY_REALSENSE_MOUNT_FRAME sensor_arch_mount_link)" />
+
   <xacro:property name="husky_front_bumper_extend" value="$(optenv HUSKY_FRONT_BUMPER_EXTEND 0)" />
   <xacro:property name="husky_rear_bumper_extend" value="$(optenv HUSKY_REAR_BUMPER_EXTEND 0)" />
 
@@ -41,6 +49,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <xacro:include filename="$(find husky_description)/urdf/wheel.urdf.xacro" />
 
   <xacro:include filename="$(find husky_description)/urdf/accessories/kinect_camera.urdf.xacro"/>
+  <xacro:include filename="$(find husky_description)/urdf/accessories/intel_realsense.urdf.xacro"/>
   <xacro:include filename="$(find husky_description)/urdf/accessories/sick_lms1xx_mount.urdf.xacro"/>
   <xacro:include filename="$(find husky_description)/urdf/accessories/sensor_arch.urdf.xacro"/>
 
@@ -59,8 +68,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <!-- Wheel Properties -->
   <xacro:property name="wheel_length" value="0.1143" />
   <xacro:property name="wheel_radius" value="0.1651" />
-
- 
 
   <!-- Base link is the center of the robot's bottom plate -->
   <link name="base_link">
@@ -119,156 +126,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <gazebo reference="imu_link">
   </gazebo>
 
-  <!-- Camera_1 code start -->
-  <joint name="camera_joint_1" type="fixed">
-    <axis xyz="0 1 0" />
-    <origin xyz="0.35 0.025 0.02" rpy="0 0 0"/>
-    <parent link="top_plate_link"/>
-    <child link="camera_link_1"/>
-  </joint>
-
-  <!-- Camera -->
-  <link name="camera_link_1">
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-    <box size="0.02 0.02 0.02"/>
-      </geometry>
-    </collision>
-
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-    <box size="0.02 0.02 0.02"/>
-      </geometry>
-      <material name="red"/>
-    </visual>
-
-    <inertial>
-      <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-    </inertial>
-  </link>
-  <!-- Camera_1 code end -->
-
-  <!-- Camera_2 code start -->
-  <joint name="camera_joint_2" type="fixed">
-    <axis xyz="0 1 0" />
-    <origin xyz="0.35 -0.025 0.02" rpy="0 0 0"/>
-    <parent link="top_plate_link"/>
-    <child link="camera_link_2"/>
-  </joint>
-
-  <!-- Camera -->
-  <link name="camera_link_2">
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-    <box size="0.02 0.02 0.02"/>
-      </geometry>
-    </collision>
-
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-    <box size="0.02 0.02 0.02"/>
-      </geometry>
-      <material name="red"/>
-    </visual>
-
-    <inertial>
-      <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-    </inertial>
-  </link>
-  <!-- Camera_2 code end -->
-
-  <!-- Gazebo plugins -->
-   
-   <gazebo reference="camera_link_1">
-    <material>Gazebo/Red</material>
-    <sensor type="camera" name="camera1">
-      <update_rate>30.0</update_rate>
-      <camera name="camera_1">
-        <horizontal_fov>1.3962634</horizontal_fov>
-        <image>
-          <width>640</width>
-          <height>480</height>
-          <format>R8G8B8</format>
-        </image>
-        <clip>
-          <near>0.02</near>
-          <far>300</far>
-        </clip>
-        <noise>
-          <type>gaussian</type>
-          <!-- Noise is sampled independently per pixel on each frame.
-               That pixel's noise value is added to each of its color
-               channels, which at that point lie in the range [0,1]. -->
-          <mean>0.0</mean>
-          <stddev>0.007</stddev>
-        </noise>
-      </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>0.0</updateRate>
-        <cameraName>husky/camera1</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>camera_link_1</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
-    </sensor>
-  </gazebo>
-   
-  <gazebo reference="camera_link_2">
-    <material>Gazebo/Red</material>
-    <sensor type="camera" name="camera2">
-      <update_rate>30.0</update_rate>
-      <camera name="camera_2">
-        <horizontal_fov>1.3962634</horizontal_fov>
-        <image>
-          <width>640</width>
-          <height>480</height>
-          <format>R8G8B8</format>
-        </image>
-        <clip>
-          <near>0.02</near>
-          <far>300</far>
-        </clip>
-        <noise>
-          <type>gaussian</type>
-          <!-- Noise is sampled independently per pixel on each frame.
-               That pixel's noise value is added to each of its color
-               channels, which at that point lie in the range [0,1]. -->
-          <mean>0.0</mean>
-          <stddev>0.007</stddev>
-        </noise>
-      </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>0.0</updateRate>
-        <cameraName>husky/camera2</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>camera_link_2</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
-    </sensor>
-  </gazebo>
-   
   <!-- Husky wheel macros -->
   <xacro:husky_wheel wheel_prefix="front_left">
     <origin xyz="${wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
@@ -299,18 +156,35 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 
   </xacro:if>
 
-  <xacro:if value="$(arg kinect_enabled)">
-
+  <!-- top sensor arch; include this if we have either the kinect or realsense enabled -->
+  <xacro:property name="topbar_needed_kinect" value="$(arg kinect_enabled)" />
+  <xacro:property name="topbar_needed_realsense" value="$(arg realsense_enabled)" />
+  <xacro:if value="${topbar_needed_kinect or topbar_needed_realsense}">
     <xacro:sensor_arch prefix="" parent="top_plate_link">
       <origin xyz="-0.35 0 0.51" rpy="0 0 -3.14"/>
     </xacro:sensor_arch>
+  </xacro:if>
+
+  <!-- add the kinect for xbox 360 to the topbar if needed -->
+  <!-- NOTE: this camera is considered depricated -->
+  <xacro:if value="$(arg kinect_enabled)">
     <joint name="kinect_frame_joint" type="fixed">
       <origin xyz="$(arg kinect_xyz)" rpy="$(arg kinect_rpy)" />
       <parent link="sensor_arch_mount_link"/>
       <child link="camera_link"/>
     </joint>
-
     <xacro:kinect_camera prefix="camera" robot_namespace="$(arg robot_namespace)"/>
+  </xacro:if>
+
+  <!-- add the intel realsense to the topbar if needed -->
+  <xacro:if value="$(arg realsense_enabled)">
+    <link name="realsense_mountpoint"/>
+    <joint name="realsense_mountpoint_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 -3.14159" />
+      <parent link="$(arg realsense_mount)"/>
+      <child link="realsense_mountpoint" />
+    </joint>
+    <xacro:intel_realsense_mount prefix="camera" topic="realsense" parent_link="realsense_mountpoint"/>
   </xacro:if>
 
   <gazebo>

@@ -24,11 +24,35 @@ namespace huro{
         depth_pub_ = it_private_.advertise("depth", 2);
         nh_private_.getParam("focus", focus_);
         nh_private_.getParam("baseline", baseline_);
-        nh_private_.getParam("block_size", focus_);
+        nh_private_.getParam("block_size", block_size_);
         nh_private_.getParam("num_disparities", num_disparities_);
         nh_private_.getParam("use_disparity_filter", USE_FILTER);
         nh_private_.getParam("lambda", lambda_);
         nh_private_.getParam("sigma", sigma_);
+    }
+
+    depth_generator::depth_generator(const ros::NodeHandle& nh,
+                                      const std::map<std::string, float>& params,
+                                      const std::string& image_left_topic,
+                                      const std::string& image_right_topic):
+    it_(nh),
+    nh_private_(ros::NodeHandle("~")),
+    it_private_(nh_private_)
+    {
+        image_left_sub_ = it_.subscribe(image_left_topic, 2, &depth_generator::left_update_callback, this);
+        image_right_sub_ = it_.subscribe(image_right_topic, 2, &depth_generator::left_update_callback, this);
+        depth_pub_ = it_private_.advertise("depth", 2);
+            
+        focus_ = params.at("focus");
+        baseline_ = params.at("baseline");
+        block_size_ = params.at("block_size");
+        num_disparities_ = params.at("num_disparities");
+        lambda_ = params.at("lambda");
+        sigma_ = params.at("sigma");
+        int filter_float = params.at("USE_FILTER");
+
+        if(filter_float == 1) USE_FILTER = true;
+        else USE_FILTER = false;
     }
 
     void depth_generator::left_update_callback(const sensor_msgs::ImageConstPtr& left){
@@ -67,11 +91,12 @@ namespace huro{
         return;
     }
 
-    cv::Mat depth_generator::calc_depth(){
+    void depth_generator::calc_depth(cv::Mat& depth, cv::Mat& disparity)
+    {
         static cv::Ptr<cv::StereoBM> left_matcher = cv::StereoBM::create(
             num_disparities_, block_size_
         );
-        cv::Mat disparity, temp_l, temp_r, temp_d;
+        cv::Mat temp_l, temp_r, temp_d;
         if (im_left_.rows > 0 && im_right_.rows>0){
             left_matcher->compute(im_left_, im_right_, temp_l);
             
@@ -99,13 +124,12 @@ namespace huro{
             }
         }
 
-        cv::Mat depth = (focus_ * baseline_)/disparity;
+        depth = (focus_ * baseline_)/disparity;
         // std::cout << depth.cols << std::endl;
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "32FC1", depth).toImageMsg();
         depth_pub_.publish(msg);
 
         // cv::Mat depth;
         // disparity.convertTo(depth, CV_16S);
-        return depth;
     }
 }
