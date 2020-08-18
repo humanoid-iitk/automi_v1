@@ -123,9 +123,7 @@ namespace huro{
                 }
             }
         }
-
         depth = (focus_ * baseline_)/disparity;
-        // std::cout << depth.cols << std::endl;
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "32FC1", depth).toImageMsg();
         depth_pub_.publish(msg);
 

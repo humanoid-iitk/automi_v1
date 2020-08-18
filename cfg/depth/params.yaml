@@ -1,6 +1,6 @@
 #depth parameters
 
-focus: 1.392                        #focal length in meters 
+focus: 381.362467                        #focal length in meters 
 baseline: 0.05                      #in meters
 block_size: 9                      #parameter for stereo matcher
 num_disparities: 32                 #parameter for stereo matcher 

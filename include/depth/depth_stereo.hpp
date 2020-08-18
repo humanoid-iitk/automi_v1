@@ -27,7 +27,7 @@ namespace huro{
         protected:
             int num_disparities_ = 2*16;
             int block_size_ = 5;
-            float focus_ = 1.3962; 
+            float focus_ = 381.362467; 
             float baseline_ = 0.05;
             int lambda_ = 8000;       //Got to configure these values properly
             int sigma_ = 5; 
