@@ -4,9 +4,9 @@
 #include <math.h>
 #include <vector>
 #include <iostream>
-#include "matplotlibcpp.h"
+// #include <matplotlibcpp.h>
 using namespace std;
-namespace plt = matplotlibcpp;
+// namespace plt = matplotlibcpp;
 #define PI 3.14159265
 
 using namespace std;
@@ -18,11 +18,11 @@ const float MAX_DIST = 2; // Threshold Distance for the algo
 const float WIDTH = 0;//Width of the robot
 
 //sample input array containing distance values at 
-vector<float> input[360];
+vector<float> input[80];
 
 
 //sample output array for storing potential field values
-vector<float> field[360];
+vector<float> field[80];
 
 //will need more work
 float index_to_angle(int i){
@@ -41,7 +41,7 @@ void draw_circle(float cx, float cy, float rad){
         x.push_back(cx+rad*cos(a));
         y.push_back(cy+rad*sin(a));
     }
-    plt::plot(x, y);
+    // plt::plot(x, y);
 }
 
 class obstacle
