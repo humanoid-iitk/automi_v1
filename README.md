@@ -74,3 +74,12 @@ git push origin ${your_branch_name}
 ### 5. Submit a Pull request so that we can review your changes
 
 Create a new pull request from the `Pull Requests` tab on this repo, not the fork.
+
+
+## Launch Histogram of depth
+
+```bash
+roslaunch husky_gazebo husky_playpen.launch
+roslaunch automi_v1 depth.launch
+```
+Outputs: #Obstacles, Obstacle Width and angle to move(target at 40)

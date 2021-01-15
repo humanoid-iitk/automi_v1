@@ -167,6 +167,7 @@ add_library(
   src/mapping/map.cpp
   src/mapping/map_manager.cpp
   src/planner/planner.cpp
+  src/planner/GaussianPF.cpp
 )
 
 ## Add cmake target dependencies of the library
