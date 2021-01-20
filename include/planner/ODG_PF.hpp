@@ -3,6 +3,10 @@
 
 #include <math.h>
 #include <vector>
+#include<opencv2/ximgproc/disparity_filter.hpp>
+#include<opencv2/opencv.hpp>
+#include<opencv2/features2d.hpp>
+#include <numeric>
 #include <iostream>
 // #include <matplotlibcpp.h>
 using namespace std;
@@ -15,7 +19,7 @@ using namespace std;
 float Gamma =0.5;   //for attractive field to g (Had to change from gamma as that's a predefined var in mathcalls.h)
 const float LC = 1; // Least count of angle for the sensor
 const float MAX_DIST = 2; // Threshold Distance for the algo
-const float WIDTH = 0;//Width of the robot
+const float WIDTH = 0.1;//Width of the robot
 
 //sample input array containing distance values at 
 vector<float> input[80];
@@ -31,17 +35,6 @@ float index_to_angle(int i){
 
 float angle_to_index(float a){
     return (a*180)/PI;
-}
-
-void draw_circle(float cx, float cy, float rad){
-    vector<float> x;
-    vector<float> y;
-    for(int i =0;i<360;i++){
-        float a = index_to_angle(i);
-        x.push_back(cx+rad*cos(a));
-        y.push_back(cy+rad*sin(a));
-    }
-    // plt::plot(x, y);
 }
 
 class obstacle
@@ -60,8 +53,10 @@ public:
     float get_theta(){ return theta;}
     float get_dist(){return d;}
     float get_phi(){ return phi;}
-    bool inVic();
+    bool inVic(){return (d<=0.1);};
 };
+
+
 
 obstacle::obstacle(float d_in, float phi_in,float theta_in)
 {
@@ -89,84 +84,133 @@ void obstacle::compute_field(vector<float> &field)
     }
 }
 
-bool obstacle::inVic(){
-    return (d<=0.1);
+vector<obstacle> get_obstacles(vector<float> polar_dat){
+    vector<obstacle> obs;
+    int flag = 0; // represents whether an obs is being read
+    float theta1, theta2, angular_width, mean_angle, dist, d;
+    polar_dat[polar_dat.size()-1] = MAX_DIST;
+    for(int i=0;i<polar_dat.size();i++){
+        dist = polar_dat[i];
+
+        if((flag == 0) and (dist<MAX_DIST)){// Start a new  obstacle
+            flag = 1;
+            theta1 = i;
+        }
+
+        else if((flag == 1) and (dist>=MAX_DIST)){
+            flag = 0;
+            theta2 = i-1;
+            angular_width = theta2-theta1;
+            mean_angle = (theta2+theta1)/2;
+            d = accumulate(&polar_dat[theta1], &polar_dat[theta2], 0.0f) / angular_width;
+            assert(angular_width >= 0);
+            obs.push_back(obstacle(d, angular_width, mean_angle));
+            theta1 = theta2;
+        }         
+    }
+    
+    return obs;
 }
 
-float get_goal_angle(float x, float y, float goal_x, float goal_y){
-    float a = atan((goal_y-y)/(goal_x-x));
-    if(goal_y-y<0 && goal_x-x>0){
-        a = 2*PI + a;
+vector<obstacle> process_obs(vector<obstacle> &obs){
+
+    vector<obstacle> obs_  = obs;
+    for (int i = 0; i<obs_.size();i++){
+        obs_[i].increase_width(WIDTH);
     }
-    else if(goal_y-y<0 && goal_x-x<0){
-        a = PI + a;
-    }
-    else if(goal_y-y>0 && goal_x-x<0){
-        a = PI+ a;
-    }
-    return a; 
+    return obs_;
 }
 
-void goal_field(vector<float> &field, float goal_angle){
-    for (int i = 0; i < field.size(); i++)
+std::vector<float> show_histogram(const std::string& name, const cv::Mat& image)
+
+
+{
+    std::vector<float> v;
+    int hist_h = 480, hist_w = 640;
+    double focus = 381.362467;
+    int cx_ = hist_w/2;
+    int cy_ = hist_h/2;
+
+    cv::Mat dist(image.rows, image.cols, CV_32F, cv::Scalar(0, 0, 0));
+    cv::Mat angle(image.rows, image.cols, CV_32F, cv::Scalar(0, 0, 0));
+
+    for(int iterr=0; iterr<image.rows; iterr++)
     {
-        float angle = index_to_angle(i);
-        auto temp = (Gamma)*abs(angle - goal_angle);
-        field[i] += temp;
+        float dist_sum = 0;
+        int count = 1;
+        for(int iterc=0; iterc<image.cols; iterc++)
+        {
+            float X = (iterc - cx_)*image.at<float>(iterr, iterc)/focus;
+            float Y = 0;
+            float Z = image.at<float>(iterr, iterc);
+            dist.at<float>(iterr, iterc) = cv::sqrt(X*X + Y*Y + Z*Z);
+            angle.at<float>(iterr, iterc) = cvRound(atan(X/Z)*180/PI);
+            int anglenow = angle.at<float>(iterr, iterc);
+            int anglebef = angle.at<float>(iterr, iterc-1);
+            
+            if(iterc==0)
+            {
+                dist_sum = dist.at<float>(iterr, iterc);
+                continue;
+            }
+            if(anglenow == anglebef)
+            {
+                dist_sum += dist.at<float>(iterr, iterc);
+                count++;
+            }
+            else
+            {
+                dist_sum = dist_sum/count;
+                v.push_back(dist_sum);
+                dist_sum = dist.at<float>(iterr, iterc);
+                count=1;
+            }
+
+        }
     }
+
+    float min_el = *std::min_element(v.begin()+5, v.end());
+    float max_el = *std::max_element(v.begin()+5, v.end());
     
-}
-
-class rect{
-    float x1, x2, x3, x4;
-    float y1, y2, y3, y4;
- public:
-    rect(float x1_, float y1_, float x3_, float y3_){   
-        x1 = x1_;
-        x2 = x3_;
-        x3 = x3_;
-        x4 = x1_;
-        y1 = y1_;
-        y2 = y1_;
-        y3 = y3_;
-        y4 = y3_;
-    }
-    bool on_line(float x, float y);
-    float get_min_dist(float x, float y, float theta);
-    void draw();
-
-};
-
-bool rect::on_line(float x, float y){
-    float cx = (x1+x2)/2;
-    float cy = (y1+y4)/2;
-    float rad = abs(x1-x2)/2;
-    if((x-cx)*(x-cx)+ (y-cy)*(y-cy) <= rad*rad)
-        return true;
+    for (int i=0; i<v.size()-5; ++i)
+    {
+        if(v[i]>max_el)
+            v[i] = v[i+5];
+    } 
     
-    return false;
-}
+    // std::cout << *std::max_element(v.begin(), v.end()) << " ";
 
-float rect::get_min_dist(float x, float y, float theta){
-    float d = 0;
-    if(this->on_line(x, y)){
-        float cx = (this->x1+this->x2)/2;
-        float cy = (this->y1+this->y4)/2;
-        float atoc = get_goal_angle(x, y,cx, cy);
-        return abs(theta-atoc);
+    cv::Mat histImage2(hist_h, hist_w, CV_8UC1, cv::Scalar(0,0,0));
+    int bin_w2 = hist_w/v.size();
+    for(int bin=0; bin<v.size(); bin++)
+    {
+        cv::line(histImage2, 
+                    cv::Point(bin_w2*bin, cvRound(v[bin]*100)),
+                    cv::Point(bin_w2*bin, hist_h),
+                    cv::Scalar(255, 255, 255));
     }
-    for(d = 0; d < MAX_DIST; d+=0.001){
-        float xi, yi;
-        xi = x + d*cos(theta); 
-        yi = y + d*sin(theta);
 
-        if(this->on_line(xi, yi))
-            break;
+    cv::imshow("dist", histImage2);
 
+    auto obstacles = get_obstacles(v);
+    obstacles = process_obs(obstacles);
+
+    std::vector<float> potfield(80, 0);
+    for(int i=0;i<obstacles.size();i++){
+        obstacles[i].compute_field(potfield);
     }
-    return d;
-}
 
-void rect::draw(){
-    draw_circle((x1+x2)/2, (y1+y3)/2, abs(x2-x1)/2);
+    // std::cout<< "v :"<< v.size() << endl;
+    cv::Mat histImage(hist_h, hist_w, CV_8UC1, cv::Scalar(0,0,0));
+    int bin_w = hist_w/potfield.size();
+    for(int bin=0; bin<potfield.size(); bin++)
+    {
+        cv::line(histImage, 
+                    cv::Point(bin_w*bin, cvRound(potfield[bin]*100)),
+                    cv::Point(bin_w*bin, hist_h),
+                    cv::Scalar(255, 255, 255));
+    }
+
+    cv::imshow(name, histImage);
+    return v;
 }
