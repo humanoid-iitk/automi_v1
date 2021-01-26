@@ -7,7 +7,6 @@
         <remap from="image1" to="camera1/image_raw/" />
         <remap from="image2" to="camera2/image_raw/" />
 
-        <!-- <rosparam file="$(find voxblox_global_planner)/cfg/params.yaml" command="load" /> -->
         <rosparam file="$(find automi_v1)/cfg/depth/params.yaml" command="load" />
     </node>
   </group>

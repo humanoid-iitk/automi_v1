@@ -13,19 +13,28 @@ namespace huro{
     class depth_generator{
         public:
             depth_generator(const ros::NodeHandle& nh, 
-                            const std::string& image_left_topic, 
-                            const std::string& image_right_topic);      //initialise parameters
-            cv::Mat calc_depth();
+                            const std::string& image_left_topic = "image1", 
+                            const std::string& image_right_topic = "image2");//initialise parameters
+            
+            depth_generator(const ros::NodeHandle& nh,
+                            const std::map<std::string, float>& params,
+                            const std::string& image_left_topic = "image1",
+                            const std::string& image_right_topic = "image2");
+            
+            void calc_depth(cv::Mat& depth, cv::Mat& disparity);
+
 
         protected:
             int num_disparities_ = 2*16;
             int block_size_ = 5;
-            float focus_ = 1.3962; 
+            float focus_ = 381.362467; 
             float baseline_ = 0.05;
             int lambda_ = 8000;       //Got to configure these values properly
             int sigma_ = 5; 
             bool USE_FILTER = true;
-
+            
+            //cv::Mat depth = cv::Mat();
+            //cv::Mat disparity = cv::Mat();
             void left_update_callback(const sensor_msgs::ImageConstPtr& left);
             void right_update_callback(const sensor_msgs::ImageConstPtr& right);
 

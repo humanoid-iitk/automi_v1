@@ -58,6 +58,7 @@ find_package(Eigen3 REQUIRED)
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
+  dimension.msg
   object.msg
   map.msg
 )
@@ -119,6 +120,7 @@ catkin_package(
  include/vio 
  include/depth 
  include/kalman
+ include/planner
  include/${PROJECT_NAME}
   
  LIBRARIES huro
@@ -147,6 +149,7 @@ include_directories(
   include/mapping
   include/depth
   include/vio
+  include/planner
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
@@ -160,8 +163,11 @@ add_library(
   src/vio/visual_odometry.cpp
   src/vio/vio.cpp
   src/kalman/kalman.cpp
-  # src/mapping/container.cpp 
+  src/mapping/container.cpp 
   src/mapping/map.cpp
+  src/mapping/map_manager.cpp
+  src/planner/planner.cpp
+  src/planner/GaussianPF.cpp
 )
 
 ## Add cmake target dependencies of the library
