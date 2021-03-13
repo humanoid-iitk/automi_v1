@@ -118,6 +118,7 @@ std::vector<float> show_histogram(const std::string& name, const cv::Mat& image)
             v[i] = v[i+5];
     } 
     
+
     for (int i = 0; i<v.size(); i++){
         v[i] = v[i];
     }
@@ -162,7 +163,9 @@ std::vector<float> show_histogram(const std::string& name, const cv::Mat& image)
     for(int bin=0; bin<potfield.size(); bin++)
     {
         cv::line(histImage, 
+
                     cv::Point(bin_w*bin, hist_h - cvRound(potfield[bin]*50)),
+
                     cv::Point(bin_w*bin, hist_h),
                     cv::Scalar(255, 255, 255));
     }
