@@ -1,5 +1,5 @@
 #include<iostream>
-#include"gradient.hpp"
+#include"GradDesend.hpp"
 #include<functional>
 
 //define cost function

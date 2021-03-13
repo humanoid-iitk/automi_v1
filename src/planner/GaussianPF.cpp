@@ -118,16 +118,33 @@ std::vector<float> show_histogram(const std::string& name, const cv::Mat& image)
             v[i] = v[i+5];
     } 
     
+
+    for (int i = 0; i<v.size(); i++){
+        v[i] = v[i];
+    }
+
     // std::cout << *std::max_element(v.begin(), v.end()) << " ";
 
     cv::Mat histImage2(hist_h, hist_w, CV_8UC1, cv::Scalar(0,0,0));
     int bin_w2 = hist_w/v.size();
     for(int bin=0; bin<v.size(); bin++)
-    {
-        cv::line(histImage2, 
-                    cv::Point(bin_w2*bin, cvRound(v[bin]*100)),
+    {   
+        if (0){
+            cv::line(histImage2, 
+                    cv::Point(bin_w2*bin, 0),
+                    cv::Point(bin_w2*bin, hist_h),
+                    cv::Scalar(255, 0, 0));
+        }else
+        {
+            cv::line(histImage2, 
+                    cv::Point(bin_w2*bin, hist_h - cvRound(v[bin]*50)),
                     cv::Point(bin_w2*bin, hist_h),
                     cv::Scalar(255, 255, 255));
+        }
+        //  cv::line(histImage2, 
+        //             cv::Point(bin_w2*bin, hist_h - cvRound(bin*100)),
+        //             cv::Point(bin_w2*bin, hist_h),
+        //             cv::Scalar(255, 255, 255));
     }
 
     cv::imshow("dist", histImage2);
@@ -146,7 +163,9 @@ std::vector<float> show_histogram(const std::string& name, const cv::Mat& image)
     for(int bin=0; bin<potfield.size(); bin++)
     {
         cv::line(histImage, 
-                    cv::Point(bin_w*bin, cvRound(potfield[bin]*100)),
+
+                    cv::Point(bin_w*bin, hist_h - cvRound(potfield[bin]*50)),
+
                     cv::Point(bin_w*bin, hist_h),
                     cv::Scalar(255, 255, 255));
     }
